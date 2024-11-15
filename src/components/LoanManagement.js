@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AddLoan from './AddLoan';
+import LoansList from './LoansList';
 import './Modal.css';
 
 function LoanManagement() {
@@ -62,8 +63,11 @@ function LoanManagement() {
                     onClose={onClose}
                 />
             )}
+
+<LoansList />
         </div>
     );
 }
 
 export default LoanManagement;
+
