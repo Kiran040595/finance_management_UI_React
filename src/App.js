@@ -11,11 +11,13 @@ function App() {
     <Router>
       <div className="App">
       <Navbar />
+      <div className="pt-16">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/loan-management" element={<LoanManagement />} />
           <Route path="/payment-tracking" element={<PaymentTracking />} />
         </Routes>
+      </div>
       </div>
     </Router>
   );
