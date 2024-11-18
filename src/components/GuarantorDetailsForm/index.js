@@ -1,6 +1,54 @@
-import React from "react";
 
-const GuarantorDetailsForm = ({ loanDetails, handleInputChange }) => (
+import React, { useState, useEffect } from "react";
+
+
+const GuarantorDetailsForm = ({ loanDetails, handleInputChange }) =>{
+
+    const [fullAddress, setFullAddress] = useState({
+        houseNo: "",
+        landmark: "",
+        street: "",
+        addressLine1: "",
+        addressLine2: "",
+        city: "",
+        state: "",
+        pinCode: "",
+    });
+
+
+
+    // Function to combine all fields into a single address string
+    const combineAddress = () => {
+        return Object.values(fullAddress)
+            .filter(Boolean) // Remove empty or undefined values
+            .join(", "); // Join with commas
+    };
+
+    // Update loanDetails.fullAddress whenever fullAddress changes
+    useEffect(() => {
+        const combinedAddress = combineAddress();
+        handleInputChange({
+            target: { name: "guarantorFullAddress", value: combinedAddress },
+        });
+    }, [fullAddress]);
+
+
+    // Handle changes to individual fields in fullAddress
+    const handleAddressChange = (event) => {
+        const { name, value } = event.target;
+        setFullAddress((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+
+    
+    
+    
+    
+    
+    return (
     <div className="p-4 mb-6 bg-white rounded-lg shadow-lg">
         <h3 className="text-lg font-semibold mb-4 text-gray-700">Guarantor Details</h3>
 
@@ -24,8 +72,8 @@ const GuarantorDetailsForm = ({ loanDetails, handleInputChange }) => (
                 <label className="block text-sm font-medium text-gray-600">Phone Number</label>
                 <input
                     type="text"
-                    name="guarantorPhoneNumber"
-                    value={loanDetails.guarantorPhoneNumber || ""}
+                    name="guarantorPhonePrimary"
+                    value={loanDetails.guarantorPhonePrimary || ""}
                     onChange={handleInputChange}
                     className="w-full p-2 border rounded-lg shadow-sm text-sm text-gray-700"
                     placeholder="Enter Phone Number"
@@ -37,8 +85,8 @@ const GuarantorDetailsForm = ({ loanDetails, handleInputChange }) => (
                 <label className="block text-sm font-medium text-gray-600">Aadhaar Number</label>
                 <input
                     type="text"
-                    name="guarantorAdharNumber"
-                    value={loanDetails.guarantorAdharNumber || ""}
+                    name="guarantorAadhaarNumber"
+                    value={loanDetails.guarantorAadhaarNumber || ""}
                     onChange={handleInputChange}
                     className="w-full p-2 border rounded-lg shadow-sm text-sm text-gray-700"
                     placeholder="Enter Aadhaar Number"
@@ -57,8 +105,8 @@ const GuarantorDetailsForm = ({ loanDetails, handleInputChange }) => (
                     <input
                         type="text"
                         name="houseNo"
-                        value={loanDetails.houseNo || ""}
-                        onChange={handleInputChange}
+                        value={fullAddress.houseNo || ""}
+                        onChange={handleAddressChange}
                         className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                         placeholder="House Number"
                     />
@@ -70,8 +118,8 @@ const GuarantorDetailsForm = ({ loanDetails, handleInputChange }) => (
                     <input
                         type="text"
                         name="landmark"
-                        value={loanDetails.landmark || ""}
-                        onChange={handleInputChange}
+                        value={fullAddress.landmark || ""}
+                        onChange={handleAddressChange}
                         className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                         placeholder="Enter Landmark"
                     />
@@ -83,8 +131,8 @@ const GuarantorDetailsForm = ({ loanDetails, handleInputChange }) => (
                     <input
                         type="text"
                         name="street"
-                        value={loanDetails.street || ""}
-                        onChange={handleInputChange}
+                        value={fullAddress.street || ""}
+                        onChange={handleAddressChange}
                         className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                         placeholder="Enter Street"
                     />
@@ -96,8 +144,8 @@ const GuarantorDetailsForm = ({ loanDetails, handleInputChange }) => (
                     <input
                         type="text"
                         name="addressLine1"
-                        value={loanDetails.addressLine1 || ""}
-                        onChange={handleInputChange}
+                        value={fullAddress.addressLine1 || ""}
+                        onChange={handleAddressChange}
                         className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                         placeholder="Address Line 1"
                     />
@@ -109,8 +157,8 @@ const GuarantorDetailsForm = ({ loanDetails, handleInputChange }) => (
                     <input
                         type="text"
                         name="addressLine2"
-                        value={loanDetails.addressLine2 || ""}
-                        onChange={handleInputChange}
+                        value={fullAddress.addressLine2 || ""}
+                        onChange={handleAddressChange}
                         className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                         placeholder="Address Line 2"
                     />
@@ -122,8 +170,8 @@ const GuarantorDetailsForm = ({ loanDetails, handleInputChange }) => (
                     <input
                         type="text"
                         name="city"
-                        value={loanDetails.city || ""}
-                        onChange={handleInputChange}
+                        value={fullAddress.city || ""}
+                        onChange={handleAddressChange}
                         className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                         placeholder="Enter City"
                     />
@@ -135,8 +183,8 @@ const GuarantorDetailsForm = ({ loanDetails, handleInputChange }) => (
                     <input
                         type="text"
                         name="state"
-                        value={loanDetails.state || ""}
-                        onChange={handleInputChange}
+                        value={fullAddress.state || ""}
+                        onChange={handleAddressChange}
                         className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                         placeholder="Enter State"
                     />
@@ -148,8 +196,8 @@ const GuarantorDetailsForm = ({ loanDetails, handleInputChange }) => (
                     <input
                         type="text"
                         name="pinCode"
-                        value={loanDetails.pinCode || ""}
-                        onChange={handleInputChange}
+                        value={fullAddress.pinCode || ""}
+                        onChange={handleAddressChange}
                         className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                         placeholder="Enter Pin Code"
                     />
@@ -158,7 +206,8 @@ const GuarantorDetailsForm = ({ loanDetails, handleInputChange }) => (
             </div>
         </div>
 
+
     </div>
 );
-
+}
 export default GuarantorDetailsForm;

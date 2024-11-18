@@ -18,14 +18,24 @@ const VehicleDetailsForm = ({ loanDetails, handleInputChange }) => (
             {/* Model Year */}
             <div className="mb-4">
                 <label className="block text-sm font-medium">Model Year</label>
-                <input
-                    type="text"
-                    name="modelYear"
-                    value={loanDetails.modelYear || ""}
+
+
+
+                <select
+                    name="vehicleModelYear"
+                    value={loanDetails.vehicleModelYear || ""}
                     onChange={handleInputChange}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400"
-                    placeholder="Enter Model Year"
-                />
+                >
+                    <option value="" disabled>
+                        Select Model Year
+                    </option>
+                    {Array.from({ length: 51 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                        <option key={year} value={year}>
+                            {year}
+                        </option>
+                    ))}
+            </select>
             </div>
 
             {/* Insurance Expiry Date */}
@@ -33,8 +43,8 @@ const VehicleDetailsForm = ({ loanDetails, handleInputChange }) => (
                 <label className="block text-sm font-medium">Insurance Expiry Date</label>
                 <input
                     type="date"
-                    name="insuranceExpiryDate"
-                    value={loanDetails.insuranceExpiryDate || ""}
+                    name="vehicleInsuranceExpiryDate"
+                    value={loanDetails.vehicleInsuranceExpiryDate || ""}
                     onChange={handleInputChange}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400"
                 />

@@ -1,4 +1,51 @@
-const CustomerDetailsForm = ({ loanDetails, handleInputChange }) => (
+import React, { useState, useEffect } from "react";
+
+
+
+const CustomerDetailsForm = ({ loanDetails, handleInputChange }) => {
+
+    const [fullAddress, setFullAddress] = useState({
+        houseNo: "",
+        landmark: "",
+        street: "",
+        addressLine1: "",
+        addressLine2: "",
+        city: "",
+        state: "",
+        pinCode: "",
+    });
+    
+    
+    
+     // Function to combine all fields into a single address string
+     const combineAddress = () => {
+        return Object.values(fullAddress)
+            .filter(Boolean) // Remove empty or undefined values
+            .join(", "); // Join with commas
+    };
+    
+    useEffect(() => {
+        const combinedAddress = combineAddress();
+        handleInputChange({
+            target: { name: "customerFullAddress", value: combinedAddress },
+        });
+    }, [fullAddress, handleInputChange]);
+    
+    
+    
+     // Handle changes to individual fields in fullAddress
+     const handleAddressChange = (event) => {
+        const { name, value } = event.target;
+        setFullAddress((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    
+    
+    
+    return(
     <div className="p-6 bg-white shadow-md rounded-lg">
         <h3 className="text-xl font-semibold mb-6 text-center">Customer Details</h3>
         
@@ -70,6 +117,10 @@ const CustomerDetailsForm = ({ loanDetails, handleInputChange }) => (
                 />
             </div>
 
+           
+               
+           
+
             {/* Full Address */}
             <div className="mb-4 col-span-3">
                 <label className="block text-sm font-medium">Address</label>
@@ -81,8 +132,8 @@ const CustomerDetailsForm = ({ loanDetails, handleInputChange }) => (
                         <input
                             type="text"
                             name="houseNo"
-                            value={loanDetails.houseNo || ""}
-                            onChange={handleInputChange}
+                            value={fullAddress.houseNo || ""}
+                            onChange={handleAddressChange}
                             className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                             placeholder="House Number"
                         />
@@ -94,8 +145,8 @@ const CustomerDetailsForm = ({ loanDetails, handleInputChange }) => (
                         <input
                             type="text"
                             name="landmark"
-                            value={loanDetails.landmark || ""}
-                            onChange={handleInputChange}
+                            value={fullAddress.landmark || ""}
+                            onChange={handleAddressChange}
                             className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                             placeholder="Enter Landmark"
                         />
@@ -107,8 +158,8 @@ const CustomerDetailsForm = ({ loanDetails, handleInputChange }) => (
                         <input
                             type="text"
                             name="street"
-                            value={loanDetails.street || ""}
-                            onChange={handleInputChange}
+                            value={fullAddress.street || ""}
+                            onChange={handleAddressChange}
                             className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                             placeholder="Enter Street"
                         />
@@ -120,8 +171,8 @@ const CustomerDetailsForm = ({ loanDetails, handleInputChange }) => (
                         <input
                             type="text"
                             name="addressLine1"
-                            value={loanDetails.addressLine1 || ""}
-                            onChange={handleInputChange}
+                            value={fullAddress.addressLine1 || ""}
+                            onChange={handleAddressChange}
                             className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                             placeholder="Address Line 1"
                         />
@@ -133,8 +184,8 @@ const CustomerDetailsForm = ({ loanDetails, handleInputChange }) => (
                         <input
                             type="text"
                             name="addressLine2"
-                            value={loanDetails.addressLine2 || ""}
-                            onChange={handleInputChange}
+                            value={fullAddress.addressLine2 || ""}
+                            onChange={handleAddressChange}
                             className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                             placeholder="Address Line 2"
                         />
@@ -146,8 +197,8 @@ const CustomerDetailsForm = ({ loanDetails, handleInputChange }) => (
                         <input
                             type="text"
                             name="city"
-                            value={loanDetails.city || ""}
-                            onChange={handleInputChange}
+                            value={fullAddress.city || ""}
+                            onChange={handleAddressChange}
                             className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                             placeholder="Enter City"
                         />
@@ -159,8 +210,8 @@ const CustomerDetailsForm = ({ loanDetails, handleInputChange }) => (
                         <input
                             type="text"
                             name="state"
-                            value={loanDetails.state || ""}
-                            onChange={handleInputChange}
+                            value={fullAddress.state || ""}
+                            onChange={handleAddressChange}
                             className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                             placeholder="Enter State"
                         />
@@ -172,8 +223,8 @@ const CustomerDetailsForm = ({ loanDetails, handleInputChange }) => (
                         <input
                             type="text"
                             name="pinCode"
-                            value={loanDetails.pinCode || ""}
-                            onChange={handleInputChange}
+                            value={fullAddress.pinCode || ""}
+                            onChange={handleAddressChange}
                             className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
                             placeholder="Enter Pin Code"
                         />
@@ -183,5 +234,5 @@ const CustomerDetailsForm = ({ loanDetails, handleInputChange }) => (
         </div>
     </div>
 );
-
+}
 export default CustomerDetailsForm;
