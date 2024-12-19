@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import AddLoan from './AddLoan';
+import React, { useState, useCallback } from 'react';
+import AddLoan from './AddLoan'; // This will include all the forms for loan, customer, vehicle, and guarantor
+import LoansList from './LoansList';
 import './Modal.css';
 
 function LoanManagement() {
@@ -9,50 +10,77 @@ function LoanManagement() {
         loanAmount: '',
         customerName: '',
         tenure: '',
-        interestRate: ''
+        interestRate: '',
+        // Customer Details
+        customerPhonePrimary: '',
+        address: '',
+        adharNumber: '',
+        // Vehicle Details
+        vehicleNumber: '',
+        modelYear: '',
+        insuranceExpiryDate: '',
+        // Guarantor Details
+        guarantorName: '',
+        guarantorPhoneNumber: '',
+        guarantorAdharNumber: '',
     });
 
     // Function to show and hide the loan form
-    const showLoanForm = () => setIsLoanFormVisible(true);
+    const showLoanForm = () => {
+        setLoanDetails({
+            loanAmount: '',
+            customerName: '',
+            tenure: '',
+            interestRate: '',
+            customerPhonePrimary: '',
+            address: '',
+            adharNumber: '',
+            vehicleNumber: '',
+            modelYear: '',
+            insuranceExpiryDate: '',
+            guarantorName: '',
+            guarantorPhoneNumber: '',
+            guarantorAdharNumber: '',
+        });  // Reset the form fields
+        setIsLoanFormVisible(true);
+    };
     const onClose = () => setIsLoanFormVisible(false);
-
+    
     // Function to handle adding a new loan
     const addNewLoan = (newLoan) => {
         setLoans([...loans, newLoan]);
         onClose(); // Close form after adding loan
     };
 
-    const handleInputChange = (e) => {
+    // Memoize the handleInputChange function
+    const handleInputChange = useCallback((e) => {
         const { name, value } = e.target;
-        setLoanDetails(prevState => ({
+        if (name === 'loanDetails') {
+            setLoanDetails(value); 
+        }
+        
+        setLoanDetails((prevState) => ({
             ...prevState,
-            [name]: value
+            [name]: value,
         }));
-    };
+    
+    }, []);
 
     return (
         <div className="loan-management">
-            
+            {/* Conditionally render the Add New Loan card */}
+            {!isLoanFormVisible && (
+                <div className="grid grid-cols-5 gap-4 sticky top-1 z-10">
+                    <div
+                        onClick={showLoanForm}
+                        className="card bg-blue-200 p-4 rounded-lg shadow-lg hover:shadow-2xl cursor-pointer transition-transform transform hover:scale-105"
+                    >
+                        <h2 className="text-center font-semibold">Add New Loan</h2>
+                    </div>
+                </div>
+            )}
 
-            <div className="grid grid-cols-3 gap-4 sticky top-1 z-10">
-    <div onClick={showLoanForm} className="card bg-blue-200 p-4 rounded-lg shadow-lg hover:shadow-2xl cursor-pointer transition-transform transform hover:scale-105">
-      <h2 className="text-center font-semibold">Add New Loan</h2>
-    </div>
-
-    <div onClick={showLoanForm} className="card bg-green-200 p-4 rounded-lg shadow-lg hover:shadow-2xl cursor-pointer transition-transform transform hover:scale-105">
-      <h2 className="text-center font-semibold">Loan List</h2>
-    </div>
-
-    <div onClick={showLoanForm} className="card bg-yellow-200 p-4 rounded-lg shadow-lg hover:shadow-2xl cursor-pointer transition-transform transform hover:scale-105">
-      <h2 className="text-center font-semibold">Loan Search</h2>
-    </div>
-  </div>
- 
-
-
-
-                       
-
+            {/* Show the AddLoan form if isLoanFormVisible is true */}
             {isLoanFormVisible && (
                 <AddLoan
                     loanDetails={loanDetails}
@@ -62,6 +90,8 @@ function LoanManagement() {
                     onClose={onClose}
                 />
             )}
+
+            <LoansList />
         </div>
     );
 }

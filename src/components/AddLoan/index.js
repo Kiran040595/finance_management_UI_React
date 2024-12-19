@@ -1,167 +1,103 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios"; 
+import LoanDetailsForm from "../LoanDetailsForm";
+import CustomerDetailsForm from "../CustomerDetailsForm";
+import VehicleDetailsForm from "../VehicleDetailsForm";
+import GuarantorDetailsForm from "../GuarantorDetailsForm";
 
-const AddLoan = ({ onSave, onClose }) => {
-    const [fileNumber, setFileNumber] = useState('');
-    const [customerName, setCustomerName] = useState('');
-    const [loanAmount, setLoanAmount] = useState('');
-    const [tenure, setTenure] = useState('');
-    const [interestRate, setInterestRate] = useState('');
-    const [vehicleNumber, setVehicleNumber] = useState('');
-    const [insuranceValidity, setInsuranceValidity] = useState('');
-    const [emi, setEmi] = useState(0);
+const AddLoan = ({ loanDetails, handleInputChange, onSave, onClose }) => {
+    const [currentStep, setCurrentStep] = useState(1); // Tracks the current step
+    const [isLoading, setIsLoading] = useState(false);  // State to handle loading during API call
 
-    const calculateEmi = () => {
-        if (loanAmount && tenure && interestRate) {
-            const principal = parseFloat(loanAmount);
-            const tenureMonths = parseInt(tenure);
-            const rateOfInterest = parseFloat(interestRate) / 100 / 12;
-            const emiValue = (principal * rateOfInterest * Math.pow(1 + rateOfInterest, tenureMonths)) / 
-                             (Math.pow(1 + rateOfInterest, tenureMonths) - 1);
-            setEmi(emiValue.toFixed(2));
-        }
-    };
 
-    useEffect(() => {
-        calculateEmi();
-    }, [loanAmount, tenure, interestRate]);
+    const nextStep = () => setCurrentStep((prev) => prev + 1);
+    const prevStep = () => setCurrentStep((prev) => prev - 1);
 
-    const handleSubmit = async (e) => {
-        console.log("calling Sub")
-        e.preventDefault();
-
-        const loanDTO = {
-            fileNumber,
-            customerName,
-            loanAmount,
-            tenure,
-            interestRate,
-            vehicleNumber,
-            insuranceValidity,
-            emi,
-          };
+    // Function to handle the final submission (onSave)
+    const handleSaveLoan = async () => {
         try {
-            const response = await axios.post('http://localhost:8081/api/loans', loanDTO );
-            onSave(response.data); // Save loan data and close form
-            // Close form after saving
-            onClose();      
+            setIsLoading(true);  // Start loading state
+            const response = await axios.post("http://localhost:8081/api/loan", loanDetails);
+            if (response.status === 200) {
+                alert("Loan saved successfully!");
+                onClose();  // Close the form after successful save
+            }
         } catch (error) {
-          console.error('Error occurred during loan creation:', error);
+            console.error("Error saving loan:", error);
+            alert("Failed to save the loan. Please try again.");
+        } finally {
+            setIsLoading(false);  // Stop loading state
         }
-    };
-
-    const handleClose = () => {
-        setFileNumber('');
-        setCustomerName('');
-        setLoanAmount('');
-        setTenure('');
-        setInterestRate('');
-        setVehicleNumber('');
-        setInsuranceValidity('');
-        setEmi(0);
-        onClose(); // Trigger onClose to close the modal
     };
 
     return (
-        <div className="modal-container w-3/4 mx-auto p-6 rounded-lg bg-white shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">Add New Loan</h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-3 gap-6">
-                    <div className="flex flex-col">
-                        <label className="font-medium mb-1">File Number</label>
-                        <input
-                            type="text"
-                            value={fileNumber}
-                            onChange={(e) => setFileNumber(e.target.value)}
-                            className="p-2 border rounded-md"
-                            required
-                        />
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="font-medium mb-1">Customer Name</label>
-                        <input
-                            type="text"
-                            value={customerName}
-                            onChange={(e) => setCustomerName(e.target.value)}
-                            className="p-2 border rounded-md"
-                            required
-                        />
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="font-medium mb-1">Loan Amount</label>
-                        <input
-                            type="number"
-                            value={loanAmount}
-                            onChange={(e) => setLoanAmount(e.target.value)}
-                            className="p-2 border rounded-md"
-                            required
-                        />
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="font-medium mb-1">Tenure (in months)</label>
-                        <input
-                            type="number"
-                            value={tenure}
-                            onChange={(e) => setTenure(e.target.value)}
-                            className="p-2 border rounded-md"
-                            required
-                        />
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="font-medium mb-1">Interest Rate (%)</label>
-                        <input
-                            type="number"
-                            value={interestRate}
-                            onChange={(e) => setInterestRate(e.target.value)}
-                            className="p-2 border rounded-md"
-                            required
-                        />
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="font-medium mb-1">Vehicle Number</label>
-                        <input
-                            type="text"
-                            value={vehicleNumber}
-                            onChange={(e) => setVehicleNumber(e.target.value)}
-                            className="p-2 border rounded-md"
-                        />
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="font-medium mb-1">Insurance Validity</label>
-                        <input
-                            type="date"
-                            value={insuranceValidity}
-                            onChange={(e) => setInsuranceValidity(e.target.value)}
-                            className="p-2 border rounded-md"
-                        />
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="font-medium mb-1">EMI</label>
-                        <input
-                            type="text"
-                            value={emi}
-                            readOnly
-                            className="p-2 border rounded-md bg-gray-200"
-                        />
-                    </div>
-                </div>
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white p-6 rounded-md w-full w-[80%] h-[90vh] overflow-y-auto pt-12">
+                <h2 className="text-xl font-bold mb-4">Add New Loan</h2>
+
+                {/* Conditional Rendering of Forms Based on Current Step */}
+                {currentStep === 1 && (
+                    <LoanDetailsForm
+                        loanDetails={loanDetails}
+                        handleInputChange={handleInputChange}
+                    />
+                )}
+                {currentStep === 2 && (
+                    <CustomerDetailsForm
+                        loanDetails={loanDetails}
+                        handleInputChange={handleInputChange}
+                    />
+                )}
+                {currentStep === 3 && (
+                    <VehicleDetailsForm
+                        loanDetails={loanDetails}
+                        handleInputChange={handleInputChange}
+                    />
+                )}
+                {currentStep === 4 && (
+                    <GuarantorDetailsForm
+                        loanDetails={loanDetails}
+                        handleInputChange={handleInputChange}
+                    />
+                )}
 
                 <div className="flex justify-between mt-4">
                     <button
-                        type="button"
-                        onClick={handleClose}
-                        className="bg-gray-500 text-white p-2 rounded-md"
+                        className="px-4 py-2 bg-gray-300 rounded"
+                        onClick={onClose} // Close the modal
                     >
-                        Cancel
+                        Close
                     </button>
-                    <button
-                        type="submit"
-                        className="bg-blue-500 text-white p-2 rounded-md"
-                    >
-                        Save Loan
-                    </button>
+
+                    {/* Navigation Buttons */}
+                    <div>
+                        {currentStep > 1 && (
+                            <button
+                                className="px-4 py-2 bg-gray-300 rounded mr-2"
+                                onClick={prevStep} // Go back to previous step
+                            >
+                                Back
+                            </button>
+                        )}
+                        {currentStep < 4 ? (
+                            <button
+                                className="px-4 py-2 bg-blue-500 text-white rounded"
+                                onClick={nextStep} // Go to next step
+                            >
+                                Next
+                            </button>
+                        ) : (
+                            <button
+                                className="px-4 py-2 bg-green-500 text-white rounded"
+                                onClick={handleSaveLoan}  // Trigger handleSaveLoan on Save
+                                disabled={isLoading}  // Disable button if loading
+                            >
+                                {isLoading ? "Saving..." : "Save"}
+                            </button>
+                        )}
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
     );
 };
