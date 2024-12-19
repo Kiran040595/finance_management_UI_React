@@ -186,11 +186,11 @@ function LoanList() {
                 {loan.customerName}
                 </Link>
                 </td>
-                <td className="py-3 px-4 text-gray-700">${loan.loanAmount}</td>
-                <td className="py-3 px-4 text-gray-700">{loan.tenure}</td>
+                <td className="py-3 px-4 text-gray-700">{loan.loanAmount}/-</td>
+                <td className="py-3 px-4 text-gray-700">{loan.phoneNumberPrimary}</td>
                 <td className="py-3 px-4 text-gray-700">{loan.vehicleNumber}</td>
-                <td className="py-3 px-4 text-gray-700">{loan.insuranceValidity}</td>
-                <td className="py-3 px-4 text-gray-700">${loan.emi}</td>
+                <td className="py-3 px-4 text-gray-700">{loan.insuranceExpiryDate}</td>
+                <td className="py-3 px-4 text-gray-700">{loan.emi}/-</td>
               </tr>
             ))}
           </tbody>
