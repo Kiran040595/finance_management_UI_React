@@ -103,3 +103,6 @@ const AddLoan = ({ loanDetails, handleInputChange, onSave, onClose }) => {
 };
 
 export default AddLoan;
+
+
+

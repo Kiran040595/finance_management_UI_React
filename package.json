@@ -69,7 +69,8 @@
     "extends": null,
     "asar": true,
   "asarUnpack": [
-        "backend/finance-management-1.0.0.jar"
+        "backend/finance-management-1.0.0.jar",
+        "custom-jre/**/*"
     ],
 
     "files": [
@@ -77,7 +78,8 @@
      "build/**/*",
       "main.js",  
       "public/**/*",
-      "backend/finance-management-1.0.0.jar"
+      "backend/finance-management-1.0.0.jar",
+      "custom-jre/**/*" 
     ],
     "directories": {
       "output": "dist"

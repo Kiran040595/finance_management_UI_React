@@ -1,9 +1,9 @@
 import React from 'react';
 import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
-import Dashboard from './components/Dashboard';
+import Dashboard from './pages/Dashboard';
 import LoanDetails from './components/LoanDetails';
-import LoanManagement from './components/LoanManagement';
+import LoanManagement from './pages/LoanManagement';
 import PaymentTracking from './components/PaymentTracking';
 import Navbar from './components/Navbar';
 

@@ -32,6 +32,36 @@ function LoanDetails() {
     }));
   };
 
+  
+
+  const handleSaveChanges = () => {
+    axios
+      .put(`http://localhost:8081/api/loan/${id}`, loan) // PUT request to save the updated loan details
+      .then(() => {
+        setIsEditing(false); // Disable edit mode after saving
+      })
+      .catch((error) => {
+        setError('Error saving loan details');
+      });
+  };
+
+  const handleDeleteLoan = () => {
+     // Redirect to the Loans page
+    if (window.confirm('Are you sure you want to delete this loan?')) {
+      axios
+        .delete(`http://localhost:8081/api/loan/${id}`) // DELETE request to remove the loan
+        .then(() => {
+          alert('Loan deleted successfully');
+          // Redirect to another page or update the state to reflect the deletion
+          navigate('/loan-management'); // Redirect to the Loans page
+        })
+        .catch((error) => {
+          setError('Error deleting loan');
+        });
+    }
+  };
+  
+
   // Toggle edit mode
   const toggleEdit = () => {
     setIsEditing((prev) => !prev);
@@ -59,10 +89,16 @@ function LoanDetails() {
       {/* Edit Toggle Button */}
       <button
         className="mb-6 px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
-        onClick={toggleEdit}
+        onClick={isEditing ? handleSaveChanges : toggleEdit}
       >
         {isEditing ? 'Save Changes' : 'Edit'}
-      </button>
+      </button> 
+
+      <button onClick={handleDeleteLoan} style={{ marginLeft: '10px', color: 'red' }}>
+      Delete Loan
+    </button>
+    {error && <p style={{ color: 'red' }}>{error}</p>}
+ 
 
       {/* Loan Information */}
       <div className="mb-8 p-6 bg-white rounded-lg shadow-md">
@@ -100,7 +136,7 @@ function LoanDetails() {
             <label>Date of Loan Creation:</label>
             {isEditing ? (
               <input
-                type="text"
+                type="date"
                 name="loanCreationDate"
                 value={loan.loanCreationDate}
                 onChange={handleInputChange}

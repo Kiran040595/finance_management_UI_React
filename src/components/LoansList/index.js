@@ -1,6 +1,9 @@
+// LoanList.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import Table from '../Table';
+import Button from '../Button';
 
 function LoanList() {
   const [loans, setLoans] = useState([]);
@@ -11,18 +14,15 @@ function LoanList() {
   const [filter, setFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // **NEW CODE: Pagination States**
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5); // Default items per page (5)
-  
-  // Fetching data from the API
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+
   useEffect(() => {
     axios
       .get('http://localhost:8081/api/loan/loans')
       .then((response) => {
-        setLoans(response.data); // Set the fetched data
-        setLoading(false); // Data fetched, stop loading
+        setLoans(response.data);
+        setLoading(false);
       })
       .catch((error) => {
         setError('Error fetching loans');
@@ -30,7 +30,16 @@ function LoanList() {
       });
   }, []);
 
-  // Sorting logic
+  const headers = [
+    { key: 'fileNumber', label: 'File Number' },
+    { key: 'customerName', label: 'Customer Name' },
+    { key: 'loanAmount', label: 'Loan Amount' },
+    { key: 'tenure', label: 'Tenure' },
+    { key: 'vehicleNumber', label: 'Vehicle Number' },
+    { key: 'insuranceValidity', label: 'Insurance Validity' },
+    { key: 'emi', label: 'EMI' },
+  ];
+
   const sortedLoans = [...loans].sort((a, b) => {
     if (a[sortConfig.key] < b[sortConfig.key]) {
       return sortConfig.direction === 'asc' ? -1 : 1;
@@ -41,22 +50,19 @@ function LoanList() {
     return 0;
   });
 
-  // **NEW CODE: Filtered and Paginated Loans**
   const filteredLoans = sortedLoans.filter((loan) => {
     const lowercasedFilter = filter.toLowerCase();
     return (
       (loan.customerName && loan.customerName.toLowerCase().includes(lowercasedFilter)) ||
       (loan.fileNumber && loan.fileNumber.toString().includes(filter)) ||
-      (loan.loanAmount && loan.loanAmount.toString().includes(filter))
+      (loan.vehicleNumber && loan.vehicleNumber.toString().includes(filter))
     );
   });
 
-  // **NEW CODE: Pagination Logic**
-  const totalPages = Math.ceil(filteredLoans.length / itemsPerPage); // Total number of pages
-  const startIndex = (currentPage - 1) * itemsPerPage; // Calculate start index
-  const currentLoans = filteredLoans.slice(startIndex, startIndex + itemsPerPage); // Slice loans based on current page
+  const totalPages = Math.ceil(filteredLoans.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentLoans = filteredLoans.slice(startIndex, startIndex + itemsPerPage);
 
-  // Handle sorting on column header click
   const handleSort = (key) => {
     let direction = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -65,37 +71,27 @@ function LoanList() {
     setSortConfig({ key, direction });
   };
 
-  // Handle the input change for filter
-  const handleFilterChange = (e) => {
-    setFilter(e.target.value);
-    setCurrentPage(1); // Reset to the first page when filter changes
-  };
-
-  // **NEW CODE: Handle Page Change**
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
-  // **NEW CODE: Handle Items Per Page Change**
   const handleItemsPerPageChange = (e) => {
-    setItemsPerPage(Number(e.target.value)); // Update the items per page
-    setCurrentPage(1); // Reset to the first page when items per page changes
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
   };
 
-  // JSX to render
   return (
     <div className="loan-list p-6 bg-white rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">Loan List</h2>
 
       <input
         type="text"
-        placeholder="Search by File Number, Customer, or Loan Amount"
+        placeholder="Search by File Number, Customer Name, or Vehicle Number"
         value={filter}
-        onChange={handleFilterChange}
+        onChange={(e) => setFilter(e.target.value)}
         className="mb-4 p-2 border border-gray-300 rounded w-full"
       />
 
-      {/* **NEW CODE: Items Per Page Dropdown** */}
       <div className="mb-4">
         <label className="font-semibold text-gray-700 mr-2">Items Per Page:</label>
         <select
@@ -113,107 +109,21 @@ function LoanList() {
         </select>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full table-auto border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-blue-100">
-              <th
-                className="py-3 px-4 border text-left font-semibold text-gray-700 cursor-pointer"
-                onClick={() => handleSort('fileNumber')}
-              >
-                File Number
-                {sortConfig.key === 'fileNumber' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
-              </th>
-              <th
-                className="py-3 px-4 border text-left font-semibold text-gray-700 cursor-pointer"
-                onClick={() => handleSort('customerName')}
-              >
-                Customer Name
-                {sortConfig.key === 'customerName' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
-              </th>
-              <th
-                className="py-3 px-4 border text-left font-semibold text-gray-700 cursor-pointer"
-                onClick={() => handleSort('loanAmount')}
-              >
-                Loan Amount
-                {sortConfig.key === 'loanAmount' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
-              </th>
-              <th
-                className="py-3 px-4 border text-left font-semibold text-gray-700 cursor-pointer"
-                onClick={() => handleSort('tenure')}
-              >
-                Tenure
-                {sortConfig.key === 'tenure' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
-              </th>
-              <th
-                className="py-3 px-4 border text-left font-semibold text-gray-700 cursor-pointer"
-                onClick={() => handleSort('vehicleNumber')}
-              >
-                Vehicle Number
-                {sortConfig.key === 'vehicleNumber' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
-              </th>
-              <th
-                className="py-3 px-4 border text-left font-semibold text-gray-700 cursor-pointer"
-                onClick={() => handleSort('insuranceValidity')}
-              >
-                Insurance Validity
-                {sortConfig.key === 'insuranceValidity' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
-              </th>
-              <th
-                className="py-3 px-4 border text-left font-semibold text-gray-700 cursor-pointer"
-                onClick={() => handleSort('emi')}
-              >
-                EMI
-                {sortConfig.key === 'emi' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentLoans.map((loan, index) => (
-              <tr
-                key={loan.id}
-                className={`border-b ${
-                  index % 2 === 0 ? 'bg-gray-50' : 'bg-gray-100'
-                } hover:bg-blue-50 transition-all`}
-              >
-                <td className="py-3 px-4 text-gray-700">
-                <Link to={`/loan/${loan.id}`} className="text-blue-500 hover:underline">
-                {loan.fileNumber}
-                </Link>
-                </td>
-                <td className="py-3 px-4 text-gray-700">
-                <Link to={`/loan/${loan.id}`} className="text-blue-500 hover:underline">
-                {loan.customerName}
-                </Link>
-                </td>
-                <td className="py-3 px-4 text-gray-700">{loan.loanAmount}/-</td>
-                <td className="py-3 px-4 text-gray-700">{loan.phoneNumberPrimary}</td>
-                <td className="py-3 px-4 text-gray-700">{loan.vehicleNumber}</td>
-                <td className="py-3 px-4 text-gray-700">{loan.insuranceExpiryDate}</td>
-                <td className="py-3 px-4 text-gray-700">{loan.emi}/-</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Table headers={headers} data={currentLoans} onSort={handleSort} sortConfig={sortConfig} clickableFields={['fileNumber', 'loanName']} />
 
-      {/* **NEW CODE: Pagination Controls** */}
-      <div className="pagination mt-4">
-        <button
-          className="px-4 py-2 border rounded bg-gray-200 hover:bg-gray-300"
-          disabled={currentPage === 1}
+      <div className="pagination mt-4 flex justify-center">
+        <Button
+          label="Previous"
           onClick={() => handlePageChange(currentPage - 1)}
-        >
-          Previous
-        </button>
+          disabled={currentPage === 1}
+          className="mr-4"
+        />
         <span className="mx-4 text-lg">{`Page ${currentPage} of ${totalPages}`}</span>
-        <button
-          className="px-4 py-2 border rounded bg-gray-200 hover:bg-gray-300"
-          disabled={currentPage === totalPages}
+        <Button
+          label="Next"
           onClick={() => handlePageChange(currentPage + 1)}
-        >
-          Next
-        </button>
+          disabled={currentPage === totalPages}
+        />
       </div>
     </div>
   );

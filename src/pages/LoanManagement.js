@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import AddLoan from './AddLoan'; // This will include all the forms for loan, customer, vehicle, and guarantor
-import LoansList from './LoansList';
-import './Modal.css';
+import AddLoan from '../components/AddLoan'; // This will include all the forms for loan, customer, vehicle, and guarantor
+import LoansList from '../components/LoansList';
+import '../styles/Modal.css';
 
 function LoanManagement() {
     const [loans, setLoans] = useState([]);

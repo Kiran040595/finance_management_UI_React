@@ -43,11 +43,24 @@ function startSpringBoot() {
     'finance-management-1.0.0.jar'
 );
 
+  // Path to the custom JRE
+  const customJrePath = path.join(
+    process.resourcesPath,
+    'app.asar.unpacked',
+    'custom-jre',
+    'bin',
+    'java'
+  );
+
   const logStream = fs.createWriteStream(logFile, { flags: 'a' });
   logStream.write("Starting Spring Boot process...\n");
 
-  springBootProcess = spawn('java', ['-jar', jarPath]);
-  console.log("Starting Spring Boot process...spawn");
+  springBootProcess = spawn(customJrePath, ['-jar', jarPath]);
+
+  console.log('Spring Boot process started with custom JRE.');
+
+  // springBootProcess = spawn('java', ['-jar', jarPath]);
+  // console.log("Starting Spring Boot process...spawn");
   
 
   // Log Spring Boot output for debugging
