@@ -18,6 +18,7 @@ function Dashboard() {
         </div>
 
         {/* Payment Tracking Section */}
+        
         <div className="bg-white shadow-md rounded-lg p-6">
           <h2 className="text-xl font-medium mb-4">Payment Tracking</h2>
           <p>Track payments and view the history of all transactions for better planning.</p>
