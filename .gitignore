@@ -12,12 +12,12 @@
 /build/
 /dist/
 /custom-jre/
-/backend # Exclude backend directory
+/backend
 /my-electron-app/out/
 /my-electron-app/build/
 /my-electron-app/*.asar
 /my-electron-app
-
+/backend
 # static files and temporary files
 *.tmp
 *.log
