@@ -22,6 +22,9 @@ function Navbar() {
             Payment Tracking
           </Link>
         </li>
+        <li>
+          <Link to="/payment" className="text-white hover:text-blue-200 transition duration-300">Payment</Link> 
+        </li>
       </ul>
     </nav>
   );
