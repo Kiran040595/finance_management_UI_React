@@ -4,6 +4,10 @@
   "private": true,
   "main": "main.js",
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^6.4.0",
+    "@mui/x-data-grid": "^7.23.6",
     "@testing-library/dom": "^9.3.4",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -26,7 +30,7 @@
     "package": "electron-packager . Finance --platform=win32 --arch=x64 --out=dist --overwrite",
     "package-all": "electron-builder -mwl",
     "package-win": "electron-packager . Finance --platform=win32 --arch=x64 --out=dist --overwrite",
-    "dist": "electron-builder --win --x64", 
+    "dist": "electron-builder --win --x64",
     "postinstall": "electron-builder install-app-deps"
   },
   "eslintConfig": {
@@ -57,7 +61,6 @@
     "prettier": "^3.3.3",
     "tailwindcss": "^3.4.15"
   },
-
   "build": {
     "appId": "com.finance.management",
     "productName": "FinanceManagement",
@@ -68,22 +71,20 @@
     },
     "extends": null,
     "asar": true,
-  "asarUnpack": [
-        "backend/finance-management-1.0.0.jar",
-        "custom-jre/**/*"
+    "asarUnpack": [
+      "backend/finance-management-1.0.0.jar",
+      "custom-jre/**/*"
     ],
-
     "files": [
       "**/*",
-     "build/**/*",
-      "main.js",  
+      "build/**/*",
+      "main.js",
       "public/**/*",
       "backend/finance-management-1.0.0.jar",
-      "custom-jre/**/*" 
+      "custom-jre/**/*"
     ],
     "directories": {
       "output": "dist"
     }
   }
 }
-
