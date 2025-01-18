@@ -3,9 +3,17 @@ import axios from 'axios';
 const API_URL = 'http://localhost:8081/api/payment/payments';  // Modify as needed
 
 // Get loan payment details
-const getLoanPayments = async () => {
+const getLoanPayments = async (currentPage, pageSize, searchQuery, sortKey, sortDirection) => {
   try {
-    const response = await axios.get(API_URL);
+
+    const params = {
+      page: currentPage,
+      size: pageSize,
+      searchQuery: searchQuery,
+      sortKey: sortKey,
+      sortDirection: sortDirection,
+    };
+    const response = await axios.get(API_URL,{ params });
     return response.data; // Returns loan payment details
   } catch (error) {
     throw new Error('Error fetching loan payments');
