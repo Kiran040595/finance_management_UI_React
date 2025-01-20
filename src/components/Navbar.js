@@ -1,32 +1,61 @@
-// src/components/Navbar.js
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { AppBar, Toolbar, Typography, Button, Container } from '@mui/material';
 
 function Navbar() {
   return (
-    <nav className=" fixed top-0 w-full bg-blue-600 p-4 flex item-center space-x-10">
-      <h1 className='text-lg font-bold text-neutral-50'>FMS</h1>
-      <ul className="flex space-x-4">
-        <li>
-          <Link to="/" className="text-white hover:text-blue-200 transition duration-300">
+    <AppBar position="fixed" color="primary">
+      <Toolbar>
+        <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
+          FMS
+        </Typography>
+        <Container sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button 
+            component={Link} 
+            to="/" 
+            sx={{
+              color: 'white', 
+              '&:hover': { color: 'lightblue' },
+              mr: 2 // margin right for spacing
+            }}
+          >
             Dashboard
-          </Link>
-        </li>
-        <li>
-          <Link to="/loan-management" className="text-white hover:text-blue-200 transition duration-300">
+          </Button>
+          <Button 
+            component={Link} 
+            to="/loan-management" 
+            sx={{
+              color: 'white', 
+              '&:hover': { color: 'lightblue' },
+              mr: 2
+            }}
+          >
             Loan Management
-          </Link>
-        </li>
-        <li>
-          <Link to="/payment-tracking" className="text-white hover:text-blue-200 transition duration-300">
+          </Button>
+          <Button 
+            component={Link} 
+            to="/payment-tracking" 
+            sx={{
+              color: 'white', 
+              '&:hover': { color: 'lightblue' },
+              mr: 2
+            }}
+          >
             Payment Tracking
-          </Link>
-        </li>
-        <li>
-          <Link to="/payment" className="text-white hover:text-blue-200 transition duration-300">Payment</Link> 
-        </li>
-      </ul>
-    </nav>
+          </Button>
+          <Button 
+            component={Link} 
+            to="/payment" 
+            sx={{
+              color: 'white', 
+              '&:hover': { color: 'lightblue' }
+            }}
+          >
+            Payment
+          </Button>
+        </Container>
+      </Toolbar>
+    </AppBar>
   );
 }
 
