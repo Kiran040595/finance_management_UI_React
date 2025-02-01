@@ -44,7 +44,7 @@ const PaymentPage = () => {
       (payment) =>
         payment.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         payment.vehicleNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        payment.fileNumber.toLowerCase().includes(searchQuery.toLowerCase())
+        payment.fileNumber.toString().toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredPayments(filtered);
   }, [searchQuery, loanPayments]);

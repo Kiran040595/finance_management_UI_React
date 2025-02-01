@@ -1,16 +1,28 @@
-// LoanList.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import {
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableSortLabel,
+  Paper,
+  Select,
+  MenuItem,
+  Button,
+  Pagination,
+} from '@mui/material';
 import { Link } from 'react-router-dom';
-import Table from '../Table';
-import Button from '../Button';
 
 function LoanList() {
   const [loans, setLoans] = useState([]);
-  const [sortConfig, setSortConfig] = useState({
-    key: 'fileNumber',
-    direction: 'asc',
-  });
+  const [sortConfig, setSortConfig] = useState({ key: 'fileNumber', direction: 'asc' });
   const [filter, setFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -36,17 +48,13 @@ function LoanList() {
     { key: 'loanAmount', label: 'Loan Amount' },
     { key: 'tenure', label: 'Tenure' },
     { key: 'vehicleNumber', label: 'Vehicle Number' },
-    { key: 'insuranceValidity', label: 'Insurance Validity' },
+    { key: 'insuranceExpiryDate', label: 'Insurance Validity' },
     { key: 'emi', label: 'EMI' },
   ];
 
   const sortedLoans = [...loans].sort((a, b) => {
-    if (a[sortConfig.key] < b[sortConfig.key]) {
-      return sortConfig.direction === 'asc' ? -1 : 1;
-    }
-    if (a[sortConfig.key] > b[sortConfig.key]) {
-      return sortConfig.direction === 'asc' ? 1 : -1;
-    }
+    if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'asc' ? 1 : -1;
     return 0;
   });
 
@@ -71,61 +79,105 @@ function LoanList() {
     setSortConfig({ key, direction });
   };
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const handleItemsPerPageChange = (e) => {
-    setItemsPerPage(Number(e.target.value));
-    setCurrentPage(1);
-  };
-
   return (
-    <div className="loan-list p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">Loan List</h2>
+    <Card sx={{ maxWidth: 1200, margin: 'auto', mt: 4, p: 2, boxShadow: 3 }}>
+      <CardContent>
+        <Typography variant="h5" gutterBottom align="center" sx={{ fontWeight: 'bold' }}>
+          Loan List
+        </Typography>
 
-      <input
-        type="text"
-        placeholder="Search by File Number, Customer Name, or Vehicle Number"
-        value={filter}
-        onChange={(e) => setFilter(e.target.value)}
-        className="mb-4 p-2 border border-gray-300 rounded w-full"
-      />
+        <TextField
+          label="Search by File Number, Customer Name, or Vehicle Number"
+          variant="outlined"
+          fullWidth
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          sx={{ mb: 3 }}
+        />
 
-      <div className="mb-4">
-        <label className="font-semibold text-gray-700 mr-2">Items Per Page:</label>
-        <select
+        <Select
           value={itemsPerPage}
-          onChange={handleItemsPerPageChange}
-          className="p-2 border border-gray-300 rounded"
+          onChange={(e) => setItemsPerPage(Number(e.target.value))}
+          displayEmpty
+          sx={{ mb: 2, minWidth: 120 }}
         >
-          <option value={5}>5</option>
-          <option value={10}>10</option>
-          <option value={15}>15</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
-          <option value={75}>75</option>
-          <option value={100}>100</option>
-        </select>
-      </div>
+          {[5, 10, 15, 20, 50, 75, 100].map((num) => (
+            <MenuItem key={num} value={num}>
+              {num} per page
+            </MenuItem>
+          ))}
+        </Select>
 
-      <Table headers={headers} data={currentLoans} onSort={handleSort} sortConfig={sortConfig} clickableFields={['fileNumber', 'loanName']} />
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {headers.map((header) => (
+                  <TableCell key={header.key}>
+                    <TableSortLabel
+                      active={sortConfig.key === header.key}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort(header.key)}
+                    >
+                      {header.label}
+                    </TableSortLabel>
+                  </TableCell>
+                ))}
+                <TableCell align="center">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={headers.length + 1} align="center">
+                    Loading...
+                  </TableCell>
+                </TableRow>
+              ) : error ? (
+                <TableRow>
+                  <TableCell colSpan={headers.length + 1} align="center" style={{ color: 'red' }}>
+                    {error}
+                  </TableCell>
+                </TableRow>
+              ) : currentLoans.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={headers.length + 1} align="center">
+                    No loans found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                currentLoans.map((loan) => (
+                  <TableRow key={loan.fileNumber}>
+                    {headers.map((header) => (
+                      <TableCell key={header.key}>{loan[header.key]}</TableCell>
+                    ))}
+                    <TableCell align="center">
+                      <Button
+                        component={Link}
+                        to={`/loan/${loan.fileNumber}`}
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                      >
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-      <div className="pagination mt-4 flex justify-center">
-        <Button
-          label="Previous"
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="mr-4"
+        <Pagination
+          count={totalPages}
+          page={currentPage}
+          onChange={(event, page) => setCurrentPage(page)}
+          color="primary"
+          sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}
         />
-        <span className="mx-4 text-lg">{`Page ${currentPage} of ${totalPages}`}</span>
-        <Button
-          label="Next"
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        />
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
