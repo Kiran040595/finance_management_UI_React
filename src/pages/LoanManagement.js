@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
+import { Button, Grid, Card, CardActionArea, CardContent, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import AddLoan from '../components/AddLoan'; // This will include all the forms for loan, customer, vehicle, and guarantor
 import LoansList from '../components/LoansList';
-import '../styles/Modal.css';
 
 function LoanManagement() {
     const [loans, setLoans] = useState([]);
@@ -11,21 +11,17 @@ function LoanManagement() {
         customerName: '',
         tenure: '',
         interestRate: '',
-        // Customer Details
         customerPhonePrimary: '',
         address: '',
         adharNumber: '',
-        // Vehicle Details
         vehicleNumber: '',
         modelYear: '',
         insuranceExpiryDate: '',
-        // Guarantor Details
         guarantorName: '',
         guarantorPhoneNumber: '',
         guarantorAdharNumber: '',
     });
 
-    // Function to show and hide the loan form
     const showLoanForm = () => {
         setLoanDetails({
             loanAmount: '',
@@ -41,56 +37,70 @@ function LoanManagement() {
             guarantorName: '',
             guarantorPhoneNumber: '',
             guarantorAdharNumber: '',
-        });  // Reset the form fields
+        });
         setIsLoanFormVisible(true);
     };
+
     const onClose = () => setIsLoanFormVisible(false);
-    
-    // Function to handle adding a new loan
+
     const addNewLoan = (newLoan) => {
         setLoans([...loans, newLoan]);
-        onClose(); // Close form after adding loan
+        onClose();
     };
 
-    // Memoize the handleInputChange function
     const handleInputChange = useCallback((e) => {
         const { name, value } = e.target;
-        if (name === 'loanDetails') {
-            setLoanDetails(value); 
-        }
-        
         setLoanDetails((prevState) => ({
             ...prevState,
             [name]: value,
         }));
-    
     }, []);
 
     return (
         <div className="loan-management">
-            {/* Conditionally render the Add New Loan card */}
+            {/* Grid Layout for Add Loan Button */}
             {!isLoanFormVisible && (
-                <div className="grid grid-cols-5 gap-4 sticky top-1 z-10">
-                    <div
-                        onClick={showLoanForm}
-                        className="card bg-blue-200 p-4 rounded-lg shadow-lg hover:shadow-2xl cursor-pointer transition-transform transform hover:scale-105"
-                    >
-                        <h2 className="text-center font-semibold">Add New Loan</h2>
-                    </div>
-                </div>
+                <Grid container justifyContent="center" sx={{ marginBottom: 3 }}>
+                    <Grid item xs={12} sm={6} md={4}>
+                        <Card
+                            sx={{
+                                backgroundColor: '#1976d2',
+                                color: 'white',
+                                textAlign: 'center',
+                                transition: '0.3s',
+                                '&:hover': { transform: 'scale(1.05)' },
+                            }}
+                        >
+                            <CardActionArea onClick={showLoanForm}>
+                                <CardContent>
+                                    <Typography variant="h6">Add New Loan</Typography>
+                                </CardContent>
+                            </CardActionArea>
+                        </Card>
+                    </Grid>
+                </Grid>
             )}
 
-            {/* Show the AddLoan form if isLoanFormVisible is true */}
-            {isLoanFormVisible && (
-                <AddLoan
-                    loanDetails={loanDetails}
-                    setLoanDetails={setLoanDetails}
-                    onSave={addNewLoan}
-                    handleInputChange={handleInputChange}
-                    onClose={onClose}
-                />
-            )}
+            {/* Add Loan Dialog (Material UI Modal) */}
+            <Dialog open={isLoanFormVisible} onClose={onClose} fullWidth maxWidth="md">
+                <DialogTitle>Add New Loan</DialogTitle>
+                <DialogContent>
+                    <AddLoan
+                        loanDetails={loanDetails}
+                        setLoanDetails={setLoanDetails}
+                        onSave={addNewLoan}
+                        handleInputChange={handleInputChange}
+                        onClose={onClose}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={onClose} color="secondary">
+                        Cancel
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
+            {/* Loan List Section */}
             <LoansList />
         </div>
     );

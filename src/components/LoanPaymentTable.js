@@ -32,8 +32,10 @@ function LoanPaymentTable({
 }) {
   const navigate = useNavigate();
 
+  const nonSortableColumns = ['phoneNumbers', 'pay', 'vehicleNumber']; // Non Sorted columns here
+
   const handleSort = (key) => {
-    if (key !== 'pay') {
+    if (!nonSortableColumns.includes(key)) {
       onSort(key);
     }
   };
@@ -78,7 +80,7 @@ function LoanPaymentTable({
                     backgroundColor: 'primary.main',
                   }}
                 >
-                  {header.key !== 'pay' ? (
+                  {!nonSortableColumns.includes(header.key) ? (
                     <Tooltip title={`Sort by ${header.label}`} arrow>
                       <TableSortLabel
                         active={sortConfig.key === header.key}
