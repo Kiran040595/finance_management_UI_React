@@ -43,6 +43,7 @@ const PaymentDetails = () => {
         const rows = response.emiDetails.map((emi) => ({
           emiNumber: emi.emiNumber,
           paidAmount: emi.paidAmount || 0,
+          emiAmount: emi.emiAmount,
           initialRemainingAmount: emi.remainingAmount || emi.emiAmount, // Set initial remaining amount
           remainingAmount: emi.remainingAmount || emi.emiAmount, // Initialize remaining amount
           paymentDate: emi.paymentDate,
@@ -61,26 +62,85 @@ const PaymentDetails = () => {
 
   
 
-  // Handle paid amount changes
   const handlePaidAmountChange = useCallback((emiNumber, value) => {
     setEmiRows((prevRows) =>
-      prevRows.map((row) =>
-        row.emiNumber === emiNumber
-          ? {
-              ...row,
-              paidAmount: value,
-              remainingAmount: row.initialRemainingAmount - value, // Calculate remaining amount dynamically
+      prevRows.map((row) => {
+        if (row.emiNumber === emiNumber) {
+          const newPaidAmount = value;
+          const baseEmiAmount = row.emiAmount; // using the explicit EMI amount
+          let overdueAmount = 0;
+  
+          // If a payment date is set, recalculate the overdue amount.
+          if (row.paymentDate) {
+            const emiDate = new Date(row.emiDate);
+            const paidDate = new Date(row.paymentDate);
+            if (paidDate > emiDate) {
+              const diffTime = paidDate - emiDate;
+              const overdueDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+              overdueAmount = baseEmiAmount * 0.002 * overdueDays;
             }
-          : row
-      )
+          }
+  
+          // Calculate the new remaining amount.
+          const newRemainingAmount = baseEmiAmount + overdueAmount - newPaidAmount;
+  
+          return {
+            ...row,
+            paidAmount: newPaidAmount,
+            remainingAmount: newRemainingAmount,
+          };
+        }
+        return row;
+      })
     );
   }, []);
+  
+
+  const handlePaymentDateChange = useCallback((emiNumber, date) => {
+    setEmiRows((prevRows) =>
+      prevRows.map((row) => {
+        if (row.emiNumber === emiNumber) {
+          // Parse dates from the row and the new value.
+          const emiDate = new Date(row.emiDate);
+          const paidDate = new Date(date);
+  
+          // Use initialRemainingAmount as the base EMI amount.
+          const baseEmiAmount = row.emiAmount; 
+          console.log(baseEmiAmount);
+          const paidAmount = row.paidAmount || 0;
+          let overdueAmount = 0;
+  
+          // Only adjust if the paid date is later than the EMI due date.
+          if (date && paidDate > emiDate) {
+            // Calculate the difference in days.
+            const diffTime = paidDate - emiDate;
+            const overdueDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            // Calculate overdue amount based on the provided logic (2% per day).
+            overdueAmount = baseEmiAmount * 0.002 * overdueDays;
+          }
+  
+          // Calculate the new remaining amount.
+          const newRemainingAmount = baseEmiAmount + overdueAmount - paidAmount;
+  
+          return {
+            ...row,
+            paymentDate: date,
+            remainingAmount: newRemainingAmount,
+          };
+        }
+        return row;
+      })
+    );
+  }, []);
+  
+  
+  
 
   // Handle payment
   const handlePay = useCallback(
-    async (emiNumber, paymentAmount) => {
+    async (emiNumber, paymentAmount,paymentDate) => {
       try {
-        const response = await PaymentService.payEMI(fileNumber, emiNumber, paymentAmount);
+        const response = await PaymentService.payEMI(fileNumber, emiNumber, paymentAmount,paymentDate);
         const { paidAmount, remainingAmount, status } = response;
 
         setEmiRows((prevRows) =>
@@ -91,6 +151,7 @@ const PaymentDetails = () => {
                   paidAmount,
                   remainingAmount, // Update remaining amount from the API response
                   status: status ? 'Paid' : 'Pending',
+                  paymentDate,
                 }
               : row
           )
@@ -153,6 +214,19 @@ const PaymentDetails = () => {
       { label: 'EMI Number', key: 'emiNumber' },
       { label: 'EMI Date', key: 'emiDate' },
       {
+        label: 'Payment Date', // New column
+        key: 'paymentDate',
+        renderCell: (row) => (
+          <input
+            type="date"
+            disabled={row.status.toLowerCase() === 'paid' || row.status.toLowerCase() === 'overpaid'}
+            value={row.paymentDate || ''}
+            onChange={(e) => handlePaymentDateChange(row.emiNumber, e.target.value)}
+            className="border border-gray-300 rounded px-2 py-1"
+          />
+        ),
+      },
+      {
         label: 'Paid Amount',
         key: 'paidAmount',
         renderCell: (row) => (
@@ -165,6 +239,7 @@ const PaymentDetails = () => {
           />
         ),
       },
+      
       {
         label: 'Remaining Amount',
         key: 'remainingAmount',
@@ -191,7 +266,7 @@ const PaymentDetails = () => {
         renderCell: (row) => (
           <button
             disabled={row.status.toLowerCase() === 'paid' || row.status.toLowerCase() === 'overpaid'}
-            onClick={() => handlePay(row.emiNumber, row.paidAmount)}
+            onClick={() => handlePay(row.emiNumber, row.paidAmount,row.paymentDate)}
             className={`px-4 py-2 rounded ${
               row.status.toLowerCase() === 'paid' || row.status.toLowerCase() === 'overpaid'
                 ? 'bg-gray-300 cursor-not-allowed'

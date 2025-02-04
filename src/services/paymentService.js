@@ -42,14 +42,15 @@ const getLoanDetailsByFileNumber = async (fileNumber) => {
 
 
 // Pay EMI for a specific loan
-const payEMI = async (fileNumber, emiNumber,paymentAmount) => {
+const payEMI = async (fileNumber, emiNumber,paymentAmount,paymentDate) => {
   console.log(fileNumber, emiNumber, paymentAmount);
   try {
-    console.log(fileNumber, emiNumber, paymentAmount);
+    console.log(fileNumber, emiNumber, paymentAmount,paymentDate);
     const response = await axios.post(`${API_URL}/pay/${fileNumber}`, {
       fileNumber,
       emiNumber,
-      paymentAmount
+      paymentAmount,
+      paymentDate
     });
     return response.data; // Returns confirmation of payment
   } catch (error) {
