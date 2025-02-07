@@ -6,7 +6,7 @@ import LoanDetails from './components/LoanDetails';
 import LoanManagement from './pages/LoanManagement';
 import PaymentPage from './pages/PaymentPage';
 import PaymentDetails from './pages/PaymentDetails';
-import PaymentTracking from './components/PaymentTracking';
+import PaymentTracking from './pages/PaymentTracking';
 import Navbar from './components/Navbar';
 
 function App() {
