@@ -2,12 +2,19 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import PaymentTable from '../components/PaymentTable';
 import PaymentService from '../services/paymentService';
-import { LinearProgress, Card, CardContent, Typography, Grid,Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogContentText, 
-  DialogActions, 
-  Button } from '@mui/material';
+import {
+  LinearProgress,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+} from '@mui/material';
 
 const PaymentDetails = () => {
   const { fileNumber } = useParams();
@@ -15,14 +22,12 @@ const PaymentDetails = () => {
   const [emiRows, setEmiRows] = useState([]);
   const [error, setError] = useState(null);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [paymentDetails, setPaymentDetails] = useState({ 
-    paidAmount: 0, 
-    remainingAmount: 0 
+  const [paymentDetails, setPaymentDetails] = useState({
+    paidAmount: 0,
+    remainingAmount: 0,
   });
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-
-  // Fetch loan details
   useEffect(() => {
     const fetchLoanDetails = async () => {
       try {
@@ -44,11 +49,12 @@ const PaymentDetails = () => {
           emiNumber: emi.emiNumber,
           paidAmount: emi.paidAmount || 0,
           emiAmount: emi.emiAmount,
-          initialRemainingAmount: emi.remainingAmount || emi.emiAmount, // Set initial remaining amount
-          remainingAmount: emi.remainingAmount || emi.emiAmount, // Initialize remaining amount
-          paymentDate: emi.paymentDate,
+          initialRemainingAmount: emi.remainingAmount || emi.emiAmount,
+          remainingAmount: emi.remainingAmount || emi.emiAmount,
+          paymentDate: emi.paymentDate || '',
           status: emi.status,
           emiDate: emi.emiDate,
+          isEditing: false,
         }));
 
         setEmiRows(rows);
@@ -60,87 +66,100 @@ const PaymentDetails = () => {
     fetchLoanDetails();
   }, [fileNumber, refreshTrigger]);
 
-  
-
-  const handlePaidAmountChange = useCallback((emiNumber, value) => {
+  const toggleEdit = useCallback((emiNumber) => {
     setEmiRows((prevRows) =>
-      prevRows.map((row) => {
-        if (row.emiNumber === emiNumber) {
-          const newPaidAmount = value;
-          const baseEmiAmount = row.emiAmount; // using the explicit EMI amount
-          let overdueAmount = 0;
-  
-          // If a payment date is set, recalculate the overdue amount.
-          if (row.paymentDate) {
+      prevRows.map((row) =>
+        row.emiNumber === emiNumber ? { ...row, isEditing: !row.isEditing } : row
+      )
+    );
+  }, []);
+
+  const handleEmiDateChange = useCallback((emiNumber, date) => {
+    setEmiRows((prevRows) =>
+      prevRows.map((row) =>
+        row.emiNumber === emiNumber ? { ...row, emiDate: date } : row
+      )
+    );
+  }, []);
+
+  const handlePaymentDateChange = useCallback(
+    (emiNumber, date) => {
+      setEmiRows((prevRows) =>
+        prevRows.map((row) => {
+          if (row.emiNumber === emiNumber) {
             const emiDate = new Date(row.emiDate);
-            const paidDate = new Date(row.paymentDate);
-            if (paidDate > emiDate) {
+            const paidDate = date ? new Date(date) : null;
+            const baseEmiAmount = row.emiAmount;
+            const paidAmount = row.paidAmount || 0;
+            let overdueAmount = 0;
+
+            if (date && paidDate > emiDate) {
               const diffTime = paidDate - emiDate;
               const overdueDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
               overdueAmount = baseEmiAmount * 0.002 * overdueDays;
             }
-          }
-  
-          // Calculate the new remaining amount.
-          const newRemainingAmount = baseEmiAmount + overdueAmount - newPaidAmount;
-  
-          return {
-            ...row,
-            paidAmount: newPaidAmount,
-            remainingAmount: newRemainingAmount,
-          };
-        }
-        return row;
-      })
-    );
-  }, []);
-  
 
-  const handlePaymentDateChange = useCallback((emiNumber, date) => {
+            const newRemainingAmount = baseEmiAmount + overdueAmount - paidAmount;
+
+            return {
+              ...row,
+              paymentDate: date,
+              remainingAmount: newRemainingAmount,
+            };
+          }
+          return row;
+        })
+      );
+    },
+    []
+  );
+
+  const handlePaidAmountChange = useCallback(
+    (emiNumber, value) => {
+      setEmiRows((prevRows) =>
+        prevRows.map((row) => {
+          if (row.emiNumber === emiNumber) {
+            const newPaidAmount = Number(value);
+            const baseEmiAmount = row.emiAmount;
+            let overdueAmount = 0;
+
+            if (row.paymentDate && row.emiDate) {
+              const emiDate = new Date(row.emiDate);
+              const paidDate = new Date(row.paymentDate);
+              if (paidDate > emiDate) {
+                const diffTime = paidDate - emiDate;
+                const overdueDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                overdueAmount = baseEmiAmount * 0.002 * overdueDays;
+              }
+            }
+
+            const newRemainingAmount = baseEmiAmount + overdueAmount - newPaidAmount;
+
+            return {
+              ...row,
+              paidAmount: newPaidAmount,
+              remainingAmount: newRemainingAmount,
+            };
+          }
+          return row;
+        })
+      );
+    },
+    []
+  );
+
+  const handleRemainingAmountChange = useCallback((emiNumber, value) => {
     setEmiRows((prevRows) =>
-      prevRows.map((row) => {
-        if (row.emiNumber === emiNumber) {
-          // Parse dates from the row and the new value.
-          const emiDate = new Date(row.emiDate);
-          const paidDate = new Date(date);
-  
-          // Use initialRemainingAmount as the base EMI amount.
-          const baseEmiAmount = row.emiAmount; 
-          console.log(baseEmiAmount);
-          const paidAmount = row.paidAmount || 0;
-          let overdueAmount = 0;
-  
-          // Only adjust if the paid date is later than the EMI due date.
-          if (date && paidDate > emiDate) {
-            // Calculate the difference in days.
-            const diffTime = paidDate - emiDate;
-            const overdueDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            // Calculate overdue amount based on the provided logic (2% per day).
-            overdueAmount = baseEmiAmount * 0.002 * overdueDays;
-          }
-  
-          // Calculate the new remaining amount.
-          const newRemainingAmount = baseEmiAmount + overdueAmount - paidAmount;
-  
-          return {
-            ...row,
-            paymentDate: date,
-            remainingAmount: newRemainingAmount,
-          };
-        }
-        return row;
-      })
+      prevRows.map((row) =>
+        row.emiNumber === emiNumber ? { ...row, remainingAmount: Number(value) } : row
+      )
     );
   }, []);
-  
-  
-  
 
-  // Handle payment
   const handlePay = useCallback(
-    async (emiNumber, paymentAmount,paymentDate) => {
+    async (emiNumber, paymentAmount, paymentDate) => {
       try {
-        const response = await PaymentService.payEMI(fileNumber, emiNumber, paymentAmount,paymentDate);
+        const response = await PaymentService.payEMI(fileNumber, emiNumber, paymentAmount, paymentDate);
         const { paidAmount, remainingAmount, status } = response;
 
         setEmiRows((prevRows) =>
@@ -149,18 +168,17 @@ const PaymentDetails = () => {
               ? {
                   ...row,
                   paidAmount,
-                  remainingAmount, // Update remaining amount from the API response
-                  status: status ? 'Paid' : 'Pending',
+                  remainingAmount,
                   paymentDate,
+                  status: status ? 'Paid' : 'Pending',
                 }
               : row
           )
         );
 
-        // Show success popup
         setPaymentDetails({
           paidAmount: paidAmount,
-          remainingAmount: remainingAmount
+          remainingAmount: remainingAmount,
         });
         setShowSuccessPopup(true);
         setRefreshTrigger((prev) => prev + 1);
@@ -172,15 +190,62 @@ const PaymentDetails = () => {
     [fileNumber]
   );
 
-  // Add the popup component
+  const handleUpdateRow = useCallback(
+    async (emiNumber) => {
+      const row = emiRows.find((r) => r.emiNumber === emiNumber);
+      if (!row.emiDate) {
+        setError('EMI Date is required.');
+        return;
+      }
+
+      try {
+        const response = await PaymentService.updateEMI(fileNumber, emiNumber, {
+          emiDate: row.emiDate,
+          paymentDate: row.paymentDate,
+          paidAmount: row.paidAmount,
+          remainingAmount: row.remainingAmount,
+        });
+
+        const { paidAmount, remainingAmount, status, emiDate, paymentDate } = response;
+
+        setEmiRows((prevRows) =>
+          prevRows.map((r) =>
+            r.emiNumber === emiNumber
+              ? {
+                  ...r,
+                  emiDate: emiDate,
+                  paymentDate: paymentDate,
+                  paidAmount: paidAmount,
+                  remainingAmount: remainingAmount,
+                  status: status,
+                  isEditing: false,
+                }
+              : r
+          )
+        );
+
+        setPaymentDetails({
+          paidAmount: paidAmount,
+          remainingAmount: remainingAmount,
+        });
+        setShowSuccessPopup(true);
+        setRefreshTrigger((prev) => prev + 1);
+      } catch (error) {
+        setError('Update failed. Please try again.');
+        console.error('Update failed:', error.message);
+      }
+    },
+    [fileNumber, emiRows]
+  );
+
   const SuccessPopup = () => (
     <Dialog
       open={showSuccessPopup}
       onClose={() => setShowSuccessPopup(false)}
       aria-labelledby="payment-success-dialog"
     >
-      <DialogTitle id="payment-success-dialog" sx={{ bgcolor: '#4CAF50', color: 'white' }}>
-        Payment Successful!
+      <DialogTitle sx={{ bgcolor: '#4CAF50', color: 'white' }}>
+        {emiRows.some((row) => row.isEditing) ? 'Update Successful!' : 'Payment Successful!'}
       </DialogTitle>
       <DialogContent sx={{ mt: 2 }}>
         <DialogContentText>
@@ -191,7 +256,7 @@ const PaymentDetails = () => {
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button 
+        <Button
           onClick={() => setShowSuccessPopup(false)}
           variant="contained"
           color="success"
@@ -203,23 +268,36 @@ const PaymentDetails = () => {
     </Dialog>
   );
 
-  // Calculate total remaining amount
   const totalRemainingAmount = useMemo(() => {
     return emiRows.reduce((sum, row) => sum + row.remainingAmount, 0);
   }, [emiRows]);
 
-  // Table headers
   const headers = useMemo(
     () => [
       { label: 'EMI Number', key: 'emiNumber' },
-      { label: 'EMI Date', key: 'emiDate' },
       {
-        label: 'Payment Date', // New column
+        label: 'EMI Date',
+        key: 'emiDate',
+        renderCell: (row) => (
+          row.isEditing ? (
+            <input
+              type="date"
+              value={row.emiDate}
+              onChange={(e) => handleEmiDateChange(row.emiNumber, e.target.value)}
+              className="border border-gray-300 rounded px-2 py-1"
+            />
+          ) : (
+            <span>{row.emiDate}</span>
+          )
+        ),
+      },
+      {
+        label: 'Payment Date',
         key: 'paymentDate',
         renderCell: (row) => (
           <input
             type="date"
-            disabled={row.status.toLowerCase() === 'paid' || row.status.toLowerCase() === 'overpaid'}
+            disabled={row.status.toLowerCase() !== 'pending' && !row.isEditing}
             value={row.paymentDate || ''}
             onChange={(e) => handlePaymentDateChange(row.emiNumber, e.target.value)}
             className="border border-gray-300 rounded px-2 py-1"
@@ -232,18 +310,28 @@ const PaymentDetails = () => {
         renderCell: (row) => (
           <input
             type="number"
-            disabled={row.status.toLowerCase() === 'paid' || row.status.toLowerCase() === 'overpaid'}
+            disabled={row.status.toLowerCase() !== 'pending' && !row.isEditing}
             value={row.paidAmount || ''}
             onChange={(e) => handlePaidAmountChange(row.emiNumber, Number(e.target.value))}
             className="border border-gray-300 rounded px-2 py-1"
           />
         ),
       },
-      
       {
         label: 'Remaining Amount',
         key: 'remainingAmount',
-        renderCell: (row) => <span className="text-gray-700">{row.remainingAmount.toFixed(2)}</span>,
+        renderCell: (row) => (
+          row.isEditing ? (
+            <input
+              type="number"
+              value={row.remainingAmount}
+              onChange={(e) => handleRemainingAmountChange(row.emiNumber, Number(e.target.value))}
+              className="border border-gray-300 rounded px-2 py-1"
+            />
+          ) : (
+            <span className="text-gray-700">{row.remainingAmount.toFixed(2)}</span>
+          )
+        ),
       },
       {
         label: 'Payment Status',
@@ -264,25 +352,59 @@ const PaymentDetails = () => {
         label: 'Actions',
         key: 'actions',
         renderCell: (row) => (
-          <button
-            disabled={row.status.toLowerCase() === 'paid' || row.status.toLowerCase() === 'overpaid'}
-            onClick={() => handlePay(row.emiNumber, row.paidAmount,row.paymentDate)}
-            className={`px-4 py-2 rounded ${
-              row.status.toLowerCase() === 'paid' || row.status.toLowerCase() === 'overpaid'
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-blue-500 hover:bg-blue-600 text-white'
-            }`}
-          >
-            Pay
-          </button>
+          <div className="flex gap-2">
+            {row.status.toLowerCase() === 'paid' || row.status.toLowerCase() === 'overpaid' ? (
+              <button
+                onClick={() => toggleEdit(row.emiNumber)}
+                className={`px-4 py-2 rounded ${
+                  row.isEditing
+                    ? 'bg-gray-500 text-white'
+                    : 'bg-green-500 hover:bg-green-600 text-white'
+                }`}
+              >
+                {row.isEditing ? 'Cancel' : 'Edit'}
+              </button>
+            ) : null}
+            <button
+              onClick={() =>
+                row.isEditing
+                  ? handleUpdateRow(row.emiNumber)
+                  : handlePay(row.emiNumber, row.paidAmount || row.emiAmount, row.paymentDate)
+              }
+              className={`px-4 py-2 rounded ${
+                row.isEditing
+                  ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                  : row.status.toLowerCase() === 'paid' || row.status.toLowerCase() === 'overpaid'
+                  ? 'bg-gray-300 cursor-not-allowed text-gray-700'
+                  : 'bg-blue-500 hover:bg-blue-600 text-white'
+              }`}
+            >
+              {row.isEditing ? 'Save' : 'Pay'}
+            </button>
+          </div>
         ),
       },
     ],
-    [handlePaidAmountChange, handlePay]
+    [
+      handlePaidAmountChange,
+      handlePay,
+      handlePaymentDateChange,
+      handleEmiDateChange,
+      handleRemainingAmountChange,
+      handleUpdateRow,
+      toggleEdit,
+    ]
   );
 
   if (error) {
-    return <p className="text-red-500">{error}</p>;
+    return (
+      <div className="text-red-500 p-4">
+        {error}
+        <Button onClick={() => setError(null)} color="primary" sx={{ ml: 2 }}>
+          Retry
+        </Button>
+      </div>
+    );
   }
 
   if (!loanDetails) {
@@ -295,10 +417,13 @@ const PaymentDetails = () => {
 
   return (
     <div className="p-4">
-      {/* Loan Details Card */}
       <Card sx={{ width: '100%', mx: 'auto', my: 4, p: 1 }}>
         <CardContent>
-          <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', mb: 2, textAlign: 'center', color: '#1976d2', fontSize: '1.2rem' }}>
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{ fontWeight: 'bold', mb: 2, textAlign: 'center', color: '#1976d2', fontSize: '1.2rem' }}
+          >
             Loan Details
           </Typography>
           <Grid container spacing={1}>
@@ -320,7 +445,10 @@ const PaymentDetails = () => {
                     <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
                       {item.label}
                     </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#1e88e5', fontSize: '0.9rem' }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 'bold', color: '#1e88e5', fontSize: '0.9rem' }}
+                    >
                       {item.value}
                     </Typography>
                   </CardContent>
@@ -331,8 +459,7 @@ const PaymentDetails = () => {
         </CardContent>
       </Card>
 
-      {/* Payment Table */}
-      <PaymentTable headers={headers} data={emiRows} onInputChange={handlePaidAmountChange} extraClass="my-4" />
+      <PaymentTable headers={headers} data={emiRows} extraClass="my-4" />
       <SuccessPopup />
     </div>
   );

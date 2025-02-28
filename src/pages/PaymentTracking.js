@@ -15,7 +15,7 @@ import {
   Box 
 } from "@mui/material";
 import PaymentTrackingService from "../services/PaymentTrackingService";
-import { Line, Bar } from 'react-chartjs-2';
+import { Line, Bar, } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, BarElement } from 'chart.js';
 
 ChartJS.register(
@@ -46,55 +46,106 @@ const PaymentTracking = () => {
       });
   }, []);
 
-  const generateDailyPayments = () => {
-    const payments = Array(30).fill(0);
-    transactions.forEach((transaction) => {
-      const date = new Date(transaction.transactionDate);
-      const today = new Date();
-      const diffDays = Math.floor((today - date) / (1000 * 60 * 60 * 24));
-      if (diffDays >= 0 && diffDays < 30) {
-        payments[diffDays] += transaction.amount;
+// Function to generate daily payments based on transaction type (EMI Paid & Loan Given)
+const generateDailyPayments = () => {
+  // Find the earliest transaction date in the data
+  const earliestDate = new Date(Math.min(...transactions.map(t => new Date(t.transactionDate))));
+  const startDay = earliestDate.getDate(); // Get the starting day of the month
+
+  // Initialize arrays for EMI collections and Loans Given
+  const emiCollections = Array(30).fill(0);
+  const loanGiven = Array(30).fill(0);
+
+  // Loop through each transaction and categorize based on transactionType
+  transactions.forEach((transaction) => {
+    const date = new Date(transaction.transactionDate); // Get the transaction date
+    const diffDays = Math.floor((date - earliestDate) / (1000 * 60 * 60 * 24)); // Days from the earliest transaction
+
+    // Only process transactions within 30 days from the first recorded transaction
+    if (diffDays >= 0 && diffDays < 30) {
+      if (transaction.transactionType === "EMI Paid") {
+        emiCollections[diffDays] += transaction.amount; // Sum EMI collections
+      } else if (transaction.transactionType === "Loan Given") {
+        loanGiven[diffDays] += transaction.amount; // Sum Loans Given
       }
-    });
-    return payments;
-  };
+    }
+  });
 
-  const dailyPayments = generateDailyPayments();
+  return { emiCollections, loanGiven };
+};
 
-  // Common chart options
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      title: { display: true, text: 'Payment Activity Overview' },
-      tooltip: { mode: 'index', intersect: false },
-    },
-    maintainAspectRatio: false
-  };
+// Generate daily payments categorized by EMI and Loan
+const { emiCollections, loanGiven } = generateDailyPayments();
 
-  // Line Chart Data
-  const lineChartData = {
-    labels: Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`),
-    datasets: [{
-      label: "Daily Payments",
-      data: dailyPayments,
-      borderColor: '#4a90e2',
-      backgroundColor: 'rgba(74, 144, 226, 0.2)',
-      fill: true,
-      tension: 0.4,
-    }]
-  };
+// Get the earliest transaction date
+const earliestDate = new Date(Math.min(...transactions.map(t => new Date(t.transactionDate))));
+const startDay = earliestDate.getDate(); // Starting day of the month
+const startMonth = earliestDate.getMonth(); // Starting month (0-11)
+const startYear = earliestDate.getFullYear(); // Starting year
 
-  // Bar Chart Data
-  const barChartData = {
-    labels: Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`),
-    datasets: [{
-      label: "Daily Payments",
-      data: dailyPayments,
-      backgroundColor: '#00c853',
+// Generate labels starting from the earliest transaction date for 30 days
+const labels = Array.from({ length: 30 }, (_, i) => {
+  let date = new Date(startYear, startMonth, startDay + i); // Generate dates correctly
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // Format: "Feb 8"
+});
+
+// Common chart options
+const chartOptions = {
+  responsive: true,
+  plugins: {
+    title: { display: true, text: 'Payment Activity Overview' },
+    tooltip: { mode: 'index', intersect: false },
+  },
+  maintainAspectRatio: false
+};
+
+// Bar Chart Data (Showing EMI Collection & Loan Given)
+const barChartData = {
+  labels: labels,
+  datasets: [
+    {
+      label: "EMI Collected",
+      data: emiCollections, // EMI collected per day
+      backgroundColor: '#00c853', // Green for EMI Collected
       borderColor: '#009624',
       borderWidth: 1,
-    }]
-  };
+    },
+    {
+      label: "Loan Given",
+      data: loanGiven, // Loan given per day
+      backgroundColor: '#e53935', // Red for Loan Given
+      borderColor: '#b71c1c',
+      borderWidth: 1,
+    }
+  ]
+}; 
+
+const lineChartData = {
+  labels: labels,
+  datasets: [
+    {
+      label: "EMI Collected",
+      data: emiCollections,
+      borderColor: '#00c853',
+      backgroundColor: 'rgba(0, 200, 83, 0.2)',
+      fill: true,
+      tension: 0.4,
+    },
+    {
+      label: "Loan Given",
+      data: loanGiven,
+      borderColor: '#e53935',
+      backgroundColor: 'rgba(229, 57, 53, 0.2)',
+      fill: true,
+      tension: 0.4,
+    }
+  ]
+};
+
+
+
+
+
 
   if (loading) return <CircularProgress style={{ marginTop: "50px" }} />;
   if (error) return <Alert severity="error">{error}</Alert>;

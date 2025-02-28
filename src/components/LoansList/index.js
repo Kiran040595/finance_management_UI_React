@@ -46,7 +46,7 @@ function LoanList() {
     { key: 'fileNumber', label: 'File Number' },
     { key: 'customerName', label: 'Customer Name' },
     { key: 'loanAmount', label: 'Loan Amount' },
-    { key: 'tenure', label: 'Tenure' },
+    { key: 'phoneNumberPrimary', label: 'Phone Number' },
     { key: 'vehicleNumber', label: 'Vehicle Number' },
     { key: 'insuranceExpiryDate', label: 'Insurance Validity' },
     { key: 'emi', label: 'EMI' },
