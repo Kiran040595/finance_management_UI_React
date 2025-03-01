@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8081/api/paymentsTracking";  // Adjust if your API URL is different
+const API_URL = "https://finance-management-b934.onrender.com/api/paymentsTracking";  // Adjust if your API URL is different
 
 // Service to handle fetching payment tracking data
 const getPayments = async () => {

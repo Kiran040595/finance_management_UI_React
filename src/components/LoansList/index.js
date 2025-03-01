@@ -31,7 +31,7 @@ function LoanList() {
 
   useEffect(() => {
     axios
-      .get('http://localhost:8081/api/loan/loans')
+      .get('https://finance-management-b934.onrender.com/api/loan/loans')
       .then((response) => {
         setLoans(response.data);
         setLoading(false);

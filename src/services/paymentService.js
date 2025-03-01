@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8081/api/payment/payments'; // Modify as needed
+const API_URL = 'https://finance-management-b934.onrender.com/api/payment/payments'; // Modify as needed
 
 // Get loan payment details
 const getLoanPayments = async (currentPage, pageSize, searchQuery, sortKey, sortDirection) => {

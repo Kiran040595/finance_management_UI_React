@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8081/api/loan";
+const API_URL = "https://finance-management-b934.onrender.com/api/loan";
 
 const getLoanStats = async () => {
   try {

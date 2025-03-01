@@ -64,7 +64,7 @@ const AddLoan = ({ onSave, onClose }) => {
 
         try {
             setIsLoading(true);
-            const response = await axios.post("http://localhost:8081/api/loan", loanDetails);
+            const response = await axios.post("https://finance-management-b934.onrender.com/api/loan", loanDetails);
             
             if (response.status === 201) {
                 setOpenDialog(true); // Open confirmation popup
